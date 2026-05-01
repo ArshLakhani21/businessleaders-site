@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { getCollection } from 'astro:content';
+
+const all = await getCollection('articles');
+const sorted = all.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+// Static-site search: ship a JSON index for client-side filtering.
+const index = sorted.map((e) => ({
+  slug: e.slug,
+  beat: e.data.beat,
+  title: e.data.title,
+  meta: e.data.metaDescription,
+  tags: e.data.tags,
+  authorName: e.data.author.name,
+  imagePath: e.data.image.path,
+  imageAlt: e.data.image.alt,
+  publishedAt: e.data.publishedAt.toISOString(),
+}));
+---
+
+<BaseLayout title="Search — Business Leader" showJustIn={false}>
+  <div class="pt-8 pb-12">
+    <h1 class="font-serif text-[2rem] font-extrabold text-navy mb-2">Search</h1>
+    <p class="text-[0.88rem] text-muted mb-5">Find anything we have published. Type a keyword, name, or beat.</p>
+    <input
+      id="q"
+      type="search"
+      placeholder="Search the archive…"
+      class="w-full md:w-[480px] border-b-2 border-gold bg-white text-navy text-[1.2rem] py-2 outline-none placeholder:text-rule"
+    />
+    <p id="count" class="text-[0.78rem] text-muted mt-2.5"></p>
+
+    <div id="results" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mt-6"></div>
+
+    <noscript>
+      <p class="text-muted">Search needs JavaScript. Browse the latest articles from the homepage.</p>
+    </noscript>
+  </div>
+</BaseLayout>
+
+<script type="application/json" id="article-index" set:html={JSON.stringify(index)}></script>
+
+<script is:inline>
+  (function () {
+    const indexEl = document.getElementById('article-index');
+    const data = indexEl ? JSON.parse(indexEl.textContent || '[]') : [];
+    const q = document.getElementById('q');
+    const results = document.getElementById('results');
+    const count = document.getElementById('count');
+    const params = new URLSearchParams(location.search);
+    const initial = params.get('q') || '';
+    if (initial) q.value = initial;
+
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function render(items) {
+      results.innerHTML = items
+        .map(
+          (a) => `
+        <a href="/${a.beat}/${a.slug}/" class="group">
+          <div class="aspect-[16/9] overflow-hidden rounded mb-2 bg-rule-soft">
+            <img src="${a.imagePath}" alt="${a.imageAlt}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+          </div>
+          <div class="text-[0.65rem] font-bold uppercase tracking-[0.08em] mb-1.5">${a.beat}</div>
+          <h3 class="font-serif font-bold text-[1.05rem] leading-snug text-navy mb-2 group-hover:text-gold">${a.title}</h3>
+          <div class="text-[0.72rem] text-muted">${a.authorName} · ${fmtDate(a.publishedAt)}</div>
+        </a>`
+        )
+        .join('');
+      count.textContent = items.length === 0 ? 'No matches.' : `${items.length} result${items.length > 1 ? 's' : ''}`;
+    }
+
+    function filter(term) {
+      const t = term.trim().toLowerCase();
+      if (!t) {
+        render(data.slice(0, 24));
+        return;
+      }
+      const tokens = t.split(/\s+/);
+      const out = data.filter((a) => {
+        const hay = `${a.title} ${a.meta} ${a.beat} ${a.authorName} ${(a.tags || []).join(' ')}`.toLowerCase();
+        return tokens.every((tok) => hay.includes(tok));
+      });
+      render(out);
+    }
+
+    q.addEventListener('input', (e) => filter(e.target.value));
+    filter(initial);
+  })();
+</script>

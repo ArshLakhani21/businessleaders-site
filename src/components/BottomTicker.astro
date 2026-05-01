@@ -1,0 +1,31 @@
+---
+const ITEMS = [
+  'NSE',
+  'BSE',
+  'SEBI',
+  'RBI',
+  'IPO Watch',
+  'Mutual Funds',
+  'Personal Finance',
+  'Crypto Policy',
+  'Bollywood',
+  'OTT Releases',
+  'Cricket Live',
+  'Athletics',
+  'Wellness',
+  'Travel',
+  'Vedic Astrology',
+];
+const doubled = [...ITEMS, ...ITEMS];
+---
+
+<div class="bg-rule-soft border-t border-rule py-2.5 overflow-hidden">
+  <div class="flex whitespace-nowrap animate-ticker-slow ticker-track">
+    {doubled.map((it) => (
+      <span class="flex items-center">
+        <span class="text-[0.78rem] text-gray-600 px-6">{it}</span>
+        <span class="text-gold text-[1rem] px-1.5">·</span>
+      </span>
+    ))}
+  </div>
+</div>

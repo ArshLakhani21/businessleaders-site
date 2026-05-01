@@ -10,35 +10,45 @@ interface Props {
   imageAlt: string;
   publishedAt: Date;
   authorName: string;
+  wordCount?: number;
 }
 
-const { title, beat, slug, imagePath, imageAlt, publishedAt, authorName } = Astro.props;
+const { title, beat, slug, imagePath, imageAlt, publishedAt, authorName, wordCount } = Astro.props;
 const href = `/${beat}/${slug}/`;
 const dateFormatted = publishedAt.toLocaleDateString('en-IN', {
   year: 'numeric',
   month: 'short',
   day: 'numeric',
 });
+const readMins = wordCount ? Math.max(1, Math.round(wordCount / 220)) : null;
 ---
 
-<article class="group cursor-pointer transition hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(13,27,42,0.1)]">
+<article class="group cursor-pointer mb-5 transition hover:-translate-y-0.5">
   <a href={href} class="block">
-    <div class="w-full aspect-[16/9] overflow-hidden rounded mb-2.5 bg-rule-soft">
+    <div class="w-full aspect-[16/9] overflow-hidden rounded-md mb-3.5 bg-rule-soft">
       <img
         src={imagePath}
         alt={imageAlt}
-        loading="lazy"
+        loading="eager"
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
       />
     </div>
-    <div class="mb-1.5">
-      <BeatBadge beat={beat} size="sm" />
+    <div class="mb-2">
+      <BeatBadge beat={beat} size="lg" />
     </div>
-    <h3 class="card-headline mb-2 group-hover:text-gold transition-colors">{title}</h3>
-    <div class="text-[0.72rem] text-muted flex items-center gap-1.5">
+    <h2 class="hero-headline mb-2.5 group-hover:text-gold transition-colors">
+      {title}
+    </h2>
+    <div class="text-[0.74rem] text-muted flex flex-wrap items-center gap-2">
       <span>{authorName}</span>
       <span class="text-rule">·</span>
       <time datetime={publishedAt.toISOString()}>{dateFormatted}</time>
+      {readMins && (
+        <>
+          <span class="text-rule">·</span>
+          <span>{readMins} min read</span>
+        </>
+      )}
     </div>
   </a>
 </article>

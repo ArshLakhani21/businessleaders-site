@@ -1,0 +1,32 @@
+---
+interface Props {
+  headlines?: string[];
+}
+
+const fallback = [
+  'Welcome to Business Leader — original Indian news three times a day',
+  'Synthesised from 90 regional and international sources',
+  '9 beats: Business, Finance, Sports, Entertainment, Lifestyle, Health, Travel, International, Astrology',
+];
+
+const { headlines = [] } = Astro.props;
+const items = headlines.length > 0 ? headlines : fallback;
+const doubled = [...items, ...items];
+---
+
+<div class="bg-white border-b border-rule flex items-center h-[38px] overflow-hidden">
+  <div class="flex-shrink-0 bg-navy text-white text-[0.68rem] font-bold tracking-[0.08em] px-3.5 h-full flex items-center gap-1.5">
+    <span class="text-red-500 animate-pulse-dot">●</span>
+    JUST IN
+  </div>
+  <div class="flex-1 overflow-hidden relative">
+    <div class="flex whitespace-nowrap animate-ticker-scroll ticker-track">
+      {doubled.map((h) => (
+        <span>
+          <span class="text-[0.78rem] text-ink px-7 hover:text-gold cursor-default">{h}</span>
+          <span class="text-gold text-[0.6rem]">◆</span>
+        </span>
+      ))}
+    </div>
+  </div>
+</div>

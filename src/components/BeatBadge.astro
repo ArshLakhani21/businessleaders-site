@@ -1,0 +1,27 @@
+---
+import { getBeat } from '../data/beats.ts';
+
+interface Props {
+  beat: string;
+  size?: 'sm' | 'md' | 'lg';
+  inverse?: boolean;
+}
+
+const { beat, size = 'md', inverse = false } = Astro.props;
+const meta = getBeat(beat);
+const label = (meta?.displayName ?? beat).toUpperCase();
+const colour = inverse ? '#F5A623' : (meta?.accentColor ?? '#0D1B2A');
+const sizeClasses = {
+  sm: 'text-[0.62rem]',
+  md: 'text-[0.65rem]',
+  lg: 'text-[0.72rem]',
+}[size];
+---
+
+<a
+  href={`/${beat}/`}
+  class:list={[sizeClasses, 'inline-block font-bold tracking-[0.08em] uppercase hover:underline']}
+  style={`color:${colour}`}
+>
+  {label}
+</a>

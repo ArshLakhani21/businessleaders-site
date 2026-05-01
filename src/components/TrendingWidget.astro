@@ -1,0 +1,34 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  items: CollectionEntry<'articles'>[];
+}
+
+const { items } = Astro.props;
+---
+
+<div>
+  <div class="section-label">Trending Now</div>
+  <div class="flex flex-col gap-3.5">
+    {items.slice(0, 5).map((entry, i) => (
+      <a
+        href={`/${entry.data.beat}/${entry.slug}/`}
+        class="flex gap-3 items-start py-1.5 border-b border-rule-soft last:border-b-0 group"
+      >
+        <div class="font-serif text-[1.4rem] font-bold text-rule min-w-[28px] leading-none pt-0.5">
+          {i + 1}
+        </div>
+        <img
+          src={entry.data.image.path}
+          alt={entry.data.image.alt}
+          loading="lazy"
+          class="w-[68px] h-[68px] rounded-md object-cover flex-shrink-0"
+        />
+        <div class="text-[0.8rem] font-semibold leading-snug text-ink group-hover:text-gold transition-colors line-clamp-3">
+          {entry.data.title}
+        </div>
+      </a>
+    ))}
+  </div>
+</div>

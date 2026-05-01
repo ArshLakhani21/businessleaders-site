@@ -1,0 +1,31 @@
+---
+// Static placeholder. When live data is wired (e.g. via a Cloudflare
+// Worker scheduled fetch) replace this with the real data feed and
+// keep the same row format.
+const MARKETS = [
+  { name: 'SENSEX', val: '75,214', pct: '+0.45%', up: true },
+  { name: 'NIFTY 50', val: '22,814', pct: '+0.43%', up: true },
+  { name: 'RELIANCE', val: '2,921', pct: '-0.48%', up: false },
+  { name: 'TCS', val: '4,105', pct: '+1.54%', up: true },
+  { name: 'GOLD ₹', val: '75,000', pct: '+1.63%', up: true },
+];
+---
+
+<div class="bg-white border border-rule-soft rounded-md p-4">
+  <div class="text-[0.65rem] font-bold tracking-[0.1em] uppercase text-muted mb-3">
+    Live Markets
+  </div>
+  {MARKETS.map((m) => (
+    <div class="flex justify-between items-center py-1.5 border-b border-rule-soft last:border-b-0">
+      <span class="text-[0.75rem] font-semibold text-navy">{m.name}</span>
+      <span class="font-mono">
+        <span class:list={['text-[0.78rem] font-bold mr-1', m.up ? 'market-up' : 'market-down']}>
+          {m.val}
+        </span>
+        <span class:list={['text-[0.7rem] font-semibold', m.up ? 'market-up' : 'market-down']}>
+          {m.up ? '▲' : '▼'} {m.pct}
+        </span>
+      </span>
+    </div>
+  ))}
+</div>

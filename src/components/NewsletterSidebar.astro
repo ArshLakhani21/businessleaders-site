@@ -1,0 +1,29 @@
+---
+// Static newsletter widget. Form action submits to a stub. Replace
+// with the live newsletter handler (Mailchimp/Buttondown/etc.) by
+// changing the action URL when ready.
+---
+
+<div class="bg-navy rounded-md p-5">
+  <div class="font-serif text-base font-bold text-white mb-1.5">
+    Start your day with BL
+  </div>
+  <p class="text-[0.75rem] text-gray-400 mb-3.5">
+    Top stories delivered every morning at 7am.
+  </p>
+  <form action="#newsletter" method="post" class="flex flex-col gap-2.5">
+    <input
+      type="email"
+      name="email"
+      required
+      placeholder="Your email address"
+      class="w-full bg-white/10 border border-white/15 rounded text-[0.8rem] text-white placeholder:text-white/40 px-3 py-2 outline-none focus:border-gold transition-colors"
+    />
+    <button
+      type="submit"
+      class="w-full bg-gold text-navy text-[0.8rem] font-bold py-2 rounded hover:bg-gold-deep transition-colors"
+    >
+      Subscribe Free
+    </button>
+  </form>
+</div>

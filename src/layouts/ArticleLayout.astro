@@ -1,5 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import BeatBadge from '../components/BeatBadge.astro';
+import { getBeat } from '../data/beats.ts';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -7,44 +9,78 @@ interface Props {
 }
 
 const { article } = Astro.props;
+const beat = getBeat(article.beat);
 const dateFormatted = article.publishedAt.toLocaleDateString('en-IN', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
 });
+const initials = article.author.name
+  .split(/\s+/)
+  .map((w) => w[0])
+  .join('')
+  .toUpperCase()
+  .slice(0, 2);
+const readMins = Math.max(1, Math.round(article.wordCount / 220));
+const shareTitle = encodeURIComponent(article.title);
+const shareUrl = encodeURIComponent(new URL(Astro.url.pathname, Astro.site ?? 'https://businessleaders.in').toString());
 ---
 
 <BaseLayout
   title={article.title}
   description={article.metaDescription}
   ogImage={article.image.path}
+  activeBeat={article.beat}
 >
-  <article class="max-w-prose mx-auto">
-    <div class="text-xs uppercase tracking-wide text-accent mb-2">
-      <a href={`/${article.beat}/`} class="hover:no-underline">{article.beat}</a>
+  <article class="max-w-prose mx-auto pt-6 pb-10">
+    <nav class="text-[0.75rem] text-muted py-3 flex flex-wrap items-center gap-1.5">
+      <a href="/" class="hover:text-gold">Home</a>
+      <span class="text-rule">·</span>
+      <a href={`/${article.beat}/`} class="hover:text-gold">{beat?.displayName ?? article.beat}</a>
+      <span class="text-rule">·</span>
+      <span class="text-ink truncate">{article.title}</span>
+    </nav>
+
+    <div class="mb-3">
+      <BeatBadge beat={article.beat} size="lg" />
     </div>
 
-    <h1 class="text-3xl md:text-4xl font-serif font-bold leading-tight mb-4">
+    <h1 class="font-serif text-[1.75rem] md:text-[2.2rem] font-extrabold leading-[1.2] text-navy mb-2.5">
       {article.title}
     </h1>
 
-    <div class="text-sm text-muted mb-6">
-      By <a href={`/author/${article.author.slug}/`}>{article.author.name}</a> ·
-      <time datetime={article.publishedAt.toISOString()}>{dateFormatted}</time>
+    {article.metaDescription && (
+      <p class="font-serif italic text-[1rem] md:text-[1.05rem] text-gray-700 leading-relaxed mb-5">
+        {article.metaDescription}
+      </p>
+    )}
+
+    <div class="flex items-center gap-3 py-4 border-y border-rule-soft mb-7">
+      <div class="w-10 h-10 rounded-full bg-navy text-gold font-bold text-[0.85rem] flex items-center justify-center flex-shrink-0">
+        {initials}
+      </div>
+      <div>
+        <div class="text-[0.85rem] font-semibold text-navy">{article.author.name}</div>
+        <div class="text-[0.75rem] text-muted">
+          <time datetime={article.publishedAt.toISOString()}>{dateFormatted}</time>
+          <span class="mx-1.5">·</span>
+          <span>{readMins} min read</span>
+        </div>
+      </div>
     </div>
 
-    <figure class="mb-8">
+    <figure class="mb-7">
       <img
         src={article.image.path}
         alt={article.image.alt}
-        class="w-full aspect-[16/9] object-cover rounded"
+        class="w-full aspect-[16/9] object-cover rounded-md"
       />
-      <figcaption class="text-xs text-muted mt-2">
+      <figcaption class="text-[0.7rem] text-muted mt-2">
         Photo: {article.image.photographer}
         {article.image.sourceUrl && (
           <>
-            {' · '}
-            <a href={article.image.sourceUrl} rel="nofollow noopener">
+            {' '}·{' '}
+            <a href={article.image.sourceUrl} rel="nofollow noopener" class="text-gold hover:underline">
               {article.image.source}
             </a>
           </>
@@ -56,36 +92,62 @@ const dateFormatted = article.publishedAt.toLocaleDateString('en-IN', {
       <slot />
     </div>
 
-    <hr class="my-10 border-rule" />
+    {article.tags && article.tags.length > 0 && (
+      <div class="flex flex-wrap gap-2 py-5 border-t border-rule-soft mt-8">
+        {article.tags.map((tag) => (
+          <span class="text-[0.72rem] font-semibold bg-rule-soft text-gray-600 px-3 py-1 rounded">{tag}</span>
+        ))}
+      </div>
+    )}
 
-    <section class="text-sm text-muted">
-      <h3 class="text-base font-semibold text-ink mb-2">Sources</h3>
-      <ul class="space-y-1">
+    <div class="flex flex-wrap gap-2.5 py-4 border-y border-rule-soft my-7 items-center">
+      <span class="text-[0.75rem] font-semibold text-muted mr-1">Share:</span>
+      <a
+        href={`https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}`}
+        target="_blank"
+        rel="noopener"
+        class="text-[0.75rem] font-semibold border-[1.5px] border-rule rounded-md px-3.5 py-1.5 hover:border-navy hover:text-navy transition-colors"
+      >
+        Twitter
+      </a>
+      <a
+        href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
+        target="_blank"
+        rel="noopener"
+        class="text-[0.75rem] font-semibold border-[1.5px] border-rule rounded-md px-3.5 py-1.5 hover:border-navy hover:text-navy transition-colors"
+      >
+        LinkedIn
+      </a>
+      <a
+        href={`https://api.whatsapp.com/send?text=${shareTitle}%20${shareUrl}`}
+        target="_blank"
+        rel="noopener"
+        class="text-[0.75rem] font-semibold border-[1.5px] border-rule rounded-md px-3.5 py-1.5 hover:border-navy hover:text-navy transition-colors"
+      >
+        WhatsApp
+      </a>
+      <a
+        href={`mailto:?subject=${shareTitle}&body=${shareUrl}`}
+        class="text-[0.75rem] font-semibold border-[1.5px] border-rule rounded-md px-3.5 py-1.5 hover:border-navy hover:text-navy transition-colors"
+      >
+        Email
+      </a>
+    </div>
+
+    <section class="mt-7">
+      <h3 class="text-[0.68rem] font-bold tracking-[0.1em] uppercase text-navy pl-2.5 mb-3 border-l-[3px] border-gold">
+        Sources
+      </h3>
+      <ul class="text-[0.85rem] text-muted space-y-1">
         {article.sources.map((s) => (
           <li>
-            <a href={s.url} rel="nofollow noopener" class="text-accent">
+            <a href={s.url} rel="nofollow noopener" class="text-gold hover:underline">
               {s.name}
             </a>
-            <span class="text-xs ml-2 text-muted">({s.language})</span>
+            <span class="text-[0.7rem] ml-2 uppercase tracking-wider">{s.language}</span>
           </li>
         ))}
       </ul>
     </section>
-
-    {article.tags && article.tags.length > 0 && (
-      <section class="mt-8">
-        <div class="text-xs uppercase tracking-wide text-muted mb-2">Tags</div>
-        <div class="flex flex-wrap gap-2">
-          {article.tags.map((tag) => (
-            <a
-              href={`/tag/${tag}/`}
-              class="text-xs px-2 py-1 rounded border border-rule text-muted hover:text-ink hover:no-underline"
-            >
-              {tag}
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
   </article>
 </BaseLayout>

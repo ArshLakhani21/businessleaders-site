@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  items: CollectionEntry<'articles'>[];
+}
+
+const { items } = Astro.props;
+const picks = items.slice(0, 3);
+---
+
+{picks.length > 0 && (
+  <section class="bg-navy py-9 my-9 -mx-5 px-5 md:rounded-md">
+    <div class="max-w-page mx-auto">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="font-serif text-[1.1rem] font-bold text-white">BL Exclusive</div>
+        <div class="flex-1 h-px bg-gradient-to-r from-gold to-transparent"></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+        {picks.map((entry) => (
+          <a href={`/${entry.data.beat}/${entry.slug}/`} class="group cursor-pointer transition hover:-translate-y-0.5">
+            <div class="w-full aspect-square overflow-hidden rounded-md mb-3 bg-navy-soft">
+              <img
+                src={entry.data.image.path}
+                alt={entry.data.image.alt}
+                loading="lazy"
+                class="w-full h-full object-cover opacity-85 transition-transform duration-300 group-hover:scale-[1.04] group-hover:opacity-100"
+              />
+            </div>
+            <h3 class="font-serif text-[0.95rem] font-bold leading-snug text-white mb-1.5 group-hover:text-gold transition-colors line-clamp-3">
+              {entry.data.title}
+            </h3>
+            <div class="text-[0.7rem] text-gray-400">{entry.data.author.name}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

@@ -1,63 +1,87 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import HeroCard from '../../components/HeroCard.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
+import TrendingWidget from '../../components/TrendingWidget.astro';
+import MarketsWidget from '../../components/MarketsWidget.astro';
+import NewsletterSidebar from '../../components/NewsletterSidebar.astro';
 import { getCollection } from 'astro:content';
-
-const BEATS = {
-  business: 'Business',
-  finance: 'Finance',
-  entertainment: 'Entertainment',
-  lifestyle: 'Lifestyle',
-  health: 'Health and Fitness',
-  travel: 'Travel',
-  international: 'International',
-  sports: 'Sports',
-  astro: 'Astrology',
-} as const;
+import { BEATS, getBeat } from '../../data/beats.ts';
 
 export async function getStaticPaths() {
-  return Object.keys({
-    business: 1,
-    finance: 1,
-    entertainment: 1,
-    lifestyle: 1,
-    health: 1,
-    travel: 1,
-    international: 1,
-    sports: 1,
-    astro: 1,
-  }).map((beat) => ({ params: { beat } }));
+  return BEATS.map((b) => ({ params: { beat: b.slug } }));
 }
 
 const { beat } = Astro.params;
-const beatName = BEATS[beat as keyof typeof BEATS] ?? beat;
+const meta = getBeat(beat as string);
+if (!meta) throw new Error(`Unknown beat: ${beat}`);
 
 const all = await getCollection('articles');
 const items = all
   .filter((entry) => entry.data.beat === beat)
   .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const hero = items[0];
+const rest = items.slice(1);
+const trending = all
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+  .slice(0, 5);
 ---
 
 <BaseLayout
-  title={`${beatName} — Business Leaders India`}
-  description={`Latest ${beatName.toLowerCase()} news from Business Leaders India.`}
+  title={`${meta.displayName} — Business Leader`}
+  description={`${meta.displayName} news, analysis and reporting from Business Leader.`}
+  activeBeat={meta.slug}
 >
-  <h1 class="font-serif text-3xl font-bold mb-6">{beatName}</h1>
+  <div class="border-b border-rule-soft pt-7 pb-5 mb-7">
+    <div class="font-serif text-[2rem] font-extrabold text-navy leading-tight" style={`color:${meta.accentColor}`}>
+      {meta.displayName}
+    </div>
+    <p class="text-[0.88rem] text-muted mt-1.5">{meta.description}</p>
+  </div>
 
-  {items.length === 0 ? (
-    <div class="text-muted py-8">No articles published in this beat yet.</div>
-  ) : (
-    items.map((entry) => (
-      <ArticleCard
-        title={entry.data.title}
-        beat={entry.data.beat}
-        slug={entry.slug}
-        metaDescription={entry.data.metaDescription}
-        imagePath={entry.data.image.path}
-        imageAlt={entry.data.image.alt}
-        publishedAt={entry.data.publishedAt}
-        authorName={entry.data.author.name}
-      />
-    ))
-  )}
+  <div class="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-9 pb-12 items-start">
+    <div>
+      {hero && (
+        <HeroCard
+          title={hero.data.title}
+          beat={hero.data.beat}
+          slug={hero.slug}
+          metaDescription={hero.data.metaDescription}
+          imagePath={hero.data.image.path}
+          imageAlt={hero.data.image.alt}
+          publishedAt={hero.data.publishedAt}
+          authorName={hero.data.author.name}
+          wordCount={hero.data.wordCount}
+        />
+      )}
+
+      {rest.length > 0 && (
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+          {rest.map((entry) => (
+            <ArticleCard
+              title={entry.data.title}
+              beat={entry.data.beat}
+              slug={entry.slug}
+              metaDescription={entry.data.metaDescription}
+              imagePath={entry.data.image.path}
+              imageAlt={entry.data.image.alt}
+              publishedAt={entry.data.publishedAt}
+              authorName={entry.data.author.name}
+            />
+          ))}
+        </div>
+      )}
+
+      {items.length === 0 && (
+        <div class="text-center py-16 text-muted">No articles in {meta.displayName} yet.</div>
+      )}
+    </div>
+
+    <aside class="md:sticky md:top-24 flex flex-col gap-7">
+      <TrendingWidget items={trending} />
+      <MarketsWidget />
+      <NewsletterSidebar />
+    </aside>
+  </div>
 </BaseLayout>

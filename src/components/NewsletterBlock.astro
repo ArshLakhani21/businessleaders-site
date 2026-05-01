@@ -1,0 +1,29 @@
+---
+// Wider newsletter block for placement between feed sections.
+---
+
+<section id="newsletter" class="bg-canvas rounded-lg px-7 py-8 text-center my-8">
+  <div class="text-[2rem] mb-2">✉️</div>
+  <h2 class="font-serif text-[1.3rem] font-bold text-navy mb-1.5">
+    News that leads. Stories that matter.
+  </h2>
+  <p class="text-[0.82rem] text-muted mb-4.5">
+    Subscribe to the Business Leader morning briefing. Free, no spam, unsubscribe anytime.
+  </p>
+  <form action="#newsletter" method="post" class="flex flex-col sm:flex-row gap-2 max-w-[420px] mx-auto mb-2.5">
+    <input
+      type="email"
+      name="email"
+      required
+      placeholder="you@example.com"
+      class="flex-1 border-[1.5px] border-rule rounded-md px-3.5 py-2.5 text-[0.85rem] outline-none focus:border-gold transition-colors"
+    />
+    <button
+      type="submit"
+      class="bg-gold text-navy text-[0.82rem] font-bold rounded-md px-5 py-2.5 hover:bg-gold-deep transition-colors whitespace-nowrap"
+    >
+      Subscribe
+    </button>
+  </form>
+  <p class="text-[0.7rem] text-gray-400">By subscribing you agree to our Privacy Policy. No spam.</p>
+</section>

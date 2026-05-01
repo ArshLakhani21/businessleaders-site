@@ -1,44 +1,133 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroCard from '../components/HeroCard.astro';
 import ArticleCard from '../components/ArticleCard.astro';
+import TrendingWidget from '../components/TrendingWidget.astro';
+import MarketsWidget from '../components/MarketsWidget.astro';
+import NewsletterSidebar from '../components/NewsletterSidebar.astro';
+import NewsletterBlock from '../components/NewsletterBlock.astro';
+import BLExclusive from '../components/BLExclusive.astro';
 import { getCollection } from 'astro:content';
+import { BEATS } from '../data/beats.ts';
 
 const all = await getCollection('articles');
-const latest = all
-  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-  .slice(0, 20);
+const sorted = all.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const hero = sorted[0];
+const topPicks = sorted.slice(1, 4);
+const blExclusive = sorted.slice(4, 7);
+const feed = sorted.slice(7, 19);
+const trending = sorted.slice(0, 5);
+
+// Headlines for the Just-In ticker — pull from latest 10
+const justIn = sorted.slice(0, 10).map((e) => e.data.title);
+
+// Per-beat latest (used below the BL Exclusive section)
+const byBeat = BEATS.map((b) => ({
+  beat: b,
+  items: sorted.filter((e) => e.data.beat === b.slug).slice(0, 3),
+})).filter((b) => b.items.length > 0);
 ---
 
-<BaseLayout title="Business Leaders India">
-  <section class="mb-8">
-    <h1 class="font-serif text-3xl md:text-4xl font-bold mb-2">
-      News from India and the world, told plainly.
-    </h1>
-    <p class="text-muted max-w-prose">
-      Business, finance, entertainment, sport, lifestyle, health, travel, world news, and Vedic
-      astrology — synthesised daily from regional and international press.
-    </p>
-  </section>
+<BaseLayout title="Business Leader" justInHeadlines={justIn}>
+  <div class="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-9 pt-7 pb-12 items-start">
+    <div>
+      {hero && (
+        <section class="mb-9">
+          <div class="section-label">Top Picks</div>
+          <HeroCard
+            title={hero.data.title}
+            beat={hero.data.beat}
+            slug={hero.slug}
+            metaDescription={hero.data.metaDescription}
+            imagePath={hero.data.image.path}
+            imageAlt={hero.data.image.alt}
+            publishedAt={hero.data.publishedAt}
+            authorName={hero.data.author.name}
+            wordCount={hero.data.wordCount}
+          />
+          {topPicks.length > 0 && (
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {topPicks.map((entry) => (
+                <ArticleCard
+                  title={entry.data.title}
+                  beat={entry.data.beat}
+                  slug={entry.slug}
+                  metaDescription={entry.data.metaDescription}
+                  imagePath={entry.data.image.path}
+                  imageAlt={entry.data.image.alt}
+                  publishedAt={entry.data.publishedAt}
+                  authorName={entry.data.author.name}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
-  {latest.length === 0 ? (
-    <div class="text-center py-16 text-muted">
-      <p class="mb-2">The pipeline hasn't published any articles yet.</p>
-      <p class="text-xs">First scheduled run: 08:00 IST.</p>
-    </div>
-  ) : (
-    <section>
-      {latest.map((entry) => (
-        <ArticleCard
-          title={entry.data.title}
-          beat={entry.data.beat}
-          slug={entry.slug}
-          metaDescription={entry.data.metaDescription}
-          imagePath={entry.data.image.path}
-          imageAlt={entry.data.image.alt}
-          publishedAt={entry.data.publishedAt}
-          authorName={entry.data.author.name}
-        />
+      {!hero && (
+        <div class="text-center py-16 text-muted">
+          <p class="mb-2">The pipeline hasn't published any articles yet.</p>
+          <p class="text-xs">First scheduled run: 08:00 IST.</p>
+        </div>
+      )}
+
+      {blExclusive.length > 0 && <BLExclusive items={blExclusive} />}
+
+      {feed.length > 0 && (
+        <section class="mb-8">
+          <div class="section-label">Latest News</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {feed.map((entry) => (
+              <ArticleCard
+                title={entry.data.title}
+                beat={entry.data.beat}
+                slug={entry.slug}
+                metaDescription={entry.data.metaDescription}
+                imagePath={entry.data.image.path}
+                imageAlt={entry.data.image.alt}
+                publishedAt={entry.data.publishedAt}
+                authorName={entry.data.author.name}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <NewsletterBlock />
+
+      {byBeat.map(({ beat, items }) => (
+        <section class="mb-9">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-[0.68rem] font-bold tracking-[0.1em] uppercase text-navy pl-2.5 border-l-[3px] border-gold">
+              {beat.displayName}
+            </div>
+            <a href={`/${beat.slug}/`} class="text-[0.78rem] font-semibold text-gold hover:underline">
+              See all →
+            </a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {items.map((entry) => (
+              <ArticleCard
+                title={entry.data.title}
+                beat={entry.data.beat}
+                slug={entry.slug}
+                metaDescription={entry.data.metaDescription}
+                imagePath={entry.data.image.path}
+                imageAlt={entry.data.image.alt}
+                publishedAt={entry.data.publishedAt}
+                authorName={entry.data.author.name}
+              />
+            ))}
+          </div>
+        </section>
       ))}
-    </section>
-  )}
+    </div>
+
+    <aside class="md:sticky md:top-24 flex flex-col gap-7">
+      <TrendingWidget items={trending} />
+      <MarketsWidget />
+      <NewsletterSidebar />
+    </aside>
+  </div>
 </BaseLayout>

@@ -1,15 +1,59 @@
 ---
+import { BEATS } from '../data/beats.ts';
+
 const year = new Date().getFullYear();
+
+const SECTIONS = [
+  { title: 'Sections', links: BEATS.slice(0, 6).map((b) => ({ href: `/${b.slug}/`, label: b.navLabel })) },
+  { title: 'About', links: [
+    { href: '/about/', label: 'About Business Leader' },
+    { href: '/contact/', label: 'Contact' },
+    { href: '/privacy/', label: 'Privacy policy' },
+    { href: '/rss.xml', label: 'RSS feed' },
+  ]},
+  { title: 'Follow', links: [
+    { href: '#', label: 'Twitter / X' },
+    { href: '#', label: 'LinkedIn' },
+    { href: '#', label: 'Instagram' },
+    { href: '#', label: 'YouTube' },
+  ]},
+];
 ---
 
-<footer class="border-t border-rule mt-16">
-  <div class="mx-auto max-w-6xl px-4 py-8 text-sm text-muted flex flex-col md:flex-row gap-3 justify-between">
-    <p>© {year} Business Leaders India. All rights reserved.</p>
-    <nav class="flex gap-4">
-      <a href="/about/">About</a>
-      <a href="/contact/">Contact</a>
-      <a href="/privacy/">Privacy</a>
-      <a href="/rss.xml">RSS</a>
-    </nav>
+<footer class="bg-navy text-white pt-12 mt-16">
+  <div class="max-w-page mx-auto px-5">
+    <div class="grid grid-cols-1 md:grid-cols-[1.5fr_repeat(3,1fr)] gap-10 pb-9">
+      <div>
+        <div class="font-serif text-[1.5rem] font-extrabold mb-2">
+          <span>Business</span><span class="text-gold ml-1">Leader</span>
+        </div>
+        <p class="text-[0.8rem] text-gray-400 mb-4 leading-relaxed">
+          News that leads. Stories that matter. Original Indian news synthesised from regional and international press.
+        </p>
+        <p class="text-[0.72rem] text-gray-500">
+          For tips, corrections, partnerships:{' '}
+          <a href="mailto:connect@publicmediasolution.com" class="text-gold hover:underline">connect@publicmediasolution.com</a>
+        </p>
+      </div>
+      {SECTIONS.map((s) => (
+        <div>
+          <div class="text-[0.68rem] font-bold tracking-[0.1em] uppercase text-gold mb-3.5">{s.title}</div>
+          {s.links.map((l) => (
+            <a href={l.href} class="block text-[0.82rem] text-gray-400 hover:text-gold mb-2 transition-colors">
+              {l.label}
+            </a>
+          ))}
+        </div>
+      ))}
+    </div>
+
+    <div class="border-t border-navy-soft py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+      <p class="text-[0.75rem] text-gray-500">© {year} Business Leader. All rights reserved.</p>
+      <div class="flex gap-4.5 text-[0.75rem] text-gray-500">
+        <a href="/privacy/" class="hover:text-gold">Privacy</a>
+        <a href="/about/" class="hover:text-gold">About</a>
+        <a href="/contact/" class="hover:text-gold">Contact</a>
+      </div>
+    </div>
   </div>
 </footer>
