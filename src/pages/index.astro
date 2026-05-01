@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { getCollection } from 'astro:content';
+
+const all = await getCollection('articles');
+const latest = all
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+  .slice(0, 20);
+---
+
+<BaseLayout title="Business Leaders India">
+  <section class="mb-8">
+    <h1 class="font-serif text-3xl md:text-4xl font-bold mb-2">
+      News from India and the world, told plainly.
+    </h1>
+    <p class="text-muted max-w-prose">
+      Business, finance, entertainment, sport, lifestyle, health, travel, world news, and Vedic
+      astrology — synthesised daily from regional and international press.
+    </p>
+  </section>
+
+  {latest.length === 0 ? (
+    <div class="text-center py-16 text-muted">
+      <p class="mb-2">The pipeline hasn't published any articles yet.</p>
+      <p class="text-xs">First scheduled run: 08:00 IST.</p>
+    </div>
+  ) : (
+    <section>
+      {latest.map((entry) => (
+        <ArticleCard
+          title={entry.data.title}
+          beat={entry.data.beat}
+          slug={entry.slug}
+          metaDescription={entry.data.metaDescription}
+          imagePath={entry.data.image.path}
+          imageAlt={entry.data.image.alt}
+          publishedAt={entry.data.publishedAt}
+          authorName={entry.data.author.name}
+        />
+      ))}
+    </section>
+  )}
+</BaseLayout>

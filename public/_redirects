@@ -1,0 +1,4 @@
+# Cloudflare Pages redirects (one rule per line)
+# Format: <from> <to> <status>
+# Examples (uncomment as needed):
+# /old-url/   /new-url/   301

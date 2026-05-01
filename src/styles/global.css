@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply text-ink bg-white antialiased;
+  }
+  a {
+    @apply text-accent hover:underline;
+  }
+}
+
+@layer components {
+  .article-prose h2 {
+    @apply mt-8 mb-3 text-2xl font-semibold;
+  }
+  .article-prose h3 {
+    @apply mt-6 mb-2 text-xl font-semibold;
+  }
+  .article-prose p {
+    @apply my-4 leading-relaxed;
+  }
+  .article-prose blockquote {
+    @apply my-6 border-l-4 border-rule pl-4 italic text-muted;
+  }
+  .article-prose ul,
+  .article-prose ol {
+    @apply my-4 ml-6;
+  }
+  .article-prose li {
+    @apply my-1;
+  }
+}

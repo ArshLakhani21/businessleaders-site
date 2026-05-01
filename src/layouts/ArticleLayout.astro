@@ -1,0 +1,91 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  article: CollectionEntry<'articles'>['data'];
+}
+
+const { article } = Astro.props;
+const dateFormatted = article.publishedAt.toLocaleDateString('en-IN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout
+  title={article.title}
+  description={article.metaDescription}
+  ogImage={article.image.path}
+>
+  <article class="max-w-prose mx-auto">
+    <div class="text-xs uppercase tracking-wide text-accent mb-2">
+      <a href={`/${article.beat}/`} class="hover:no-underline">{article.beat}</a>
+    </div>
+
+    <h1 class="text-3xl md:text-4xl font-serif font-bold leading-tight mb-4">
+      {article.title}
+    </h1>
+
+    <div class="text-sm text-muted mb-6">
+      By <a href={`/author/${article.author.slug}/`}>{article.author.name}</a> ·
+      <time datetime={article.publishedAt.toISOString()}>{dateFormatted}</time>
+    </div>
+
+    <figure class="mb-8">
+      <img
+        src={article.image.path}
+        alt={article.image.alt}
+        class="w-full aspect-[16/9] object-cover rounded"
+      />
+      <figcaption class="text-xs text-muted mt-2">
+        Photo: {article.image.photographer}
+        {article.image.sourceUrl && (
+          <>
+            {' · '}
+            <a href={article.image.sourceUrl} rel="nofollow noopener">
+              {article.image.source}
+            </a>
+          </>
+        )}
+      </figcaption>
+    </figure>
+
+    <div class="article-prose">
+      <slot />
+    </div>
+
+    <hr class="my-10 border-rule" />
+
+    <section class="text-sm text-muted">
+      <h3 class="text-base font-semibold text-ink mb-2">Sources</h3>
+      <ul class="space-y-1">
+        {article.sources.map((s) => (
+          <li>
+            <a href={s.url} rel="nofollow noopener" class="text-accent">
+              {s.name}
+            </a>
+            <span class="text-xs ml-2 text-muted">({s.language})</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {article.tags && article.tags.length > 0 && (
+      <section class="mt-8">
+        <div class="text-xs uppercase tracking-wide text-muted mb-2">Tags</div>
+        <div class="flex flex-wrap gap-2">
+          {article.tags.map((tag) => (
+            <a
+              href={`/tag/${tag}/`}
+              class="text-xs px-2 py-1 rounded border border-rule text-muted hover:text-ink hover:no-underline"
+            >
+              {tag}
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>

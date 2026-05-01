@@ -1,0 +1,42 @@
+---
+interface Props {
+  title: string;
+  beat: string;
+  slug: string;
+  metaDescription: string;
+  imagePath: string;
+  imageAlt: string;
+  publishedAt: Date;
+  authorName: string;
+}
+
+const { title, beat, slug, metaDescription, imagePath, imageAlt, publishedAt, authorName } =
+  Astro.props;
+const href = `/${beat}/${slug}/`;
+const dateFormatted = publishedAt.toLocaleDateString('en-IN', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<article class="border-b border-rule pb-6 mb-6 last:border-b-0">
+  <a href={href} class="grid grid-cols-1 md:grid-cols-3 gap-4 hover:no-underline">
+    <div class="md:col-span-1">
+      <img
+        src={imagePath}
+        alt={imageAlt}
+        loading="lazy"
+        class="w-full aspect-[16/9] object-cover rounded"
+      />
+    </div>
+    <div class="md:col-span-2">
+      <div class="text-xs uppercase tracking-wide text-accent mb-1">{beat}</div>
+      <h2 class="text-xl font-semibold text-ink leading-tight mb-2">{title}</h2>
+      <p class="text-sm text-muted mb-2 line-clamp-2">{metaDescription}</p>
+      <div class="text-xs text-muted">
+        {authorName} · <time datetime={publishedAt.toISOString()}>{dateFormatted}</time>
+      </div>
+    </div>
+  </a>
+</article>
