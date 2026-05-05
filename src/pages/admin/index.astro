@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Admin — Business Leader" showJustIn={false} showBottomTicker={false}>
+  <div class="max-w-md mx-auto pt-16 pb-20">
+    <h1 class="font-serif text-3xl font-extrabold text-navy mb-2">Admin</h1>
+    <p class="text-muted text-sm mb-8">
+      Sign in to publish, edit, or manage articles. The session lasts 24 hours.
+    </p>
+
+    <form id="login-form" class="flex flex-col gap-4">
+      <label class="block">
+        <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Password</span>
+        <input
+          type="password"
+          name="password"
+          required
+          autocomplete="current-password"
+          class="w-full border-2 border-rule rounded-md px-4 py-3 text-base outline-none focus:border-gold transition-colors"
+          placeholder="••••••••"
+        />
+      </label>
+      <button
+        type="submit"
+        class="w-full bg-gold text-navy font-bold uppercase tracking-wider py-3 rounded-md hover:bg-gold-deep transition-colors"
+      >
+        Sign in
+      </button>
+      <p id="login-error" class="text-down-red text-sm hidden"></p>
+    </form>
+
+    <p class="text-xs text-muted mt-8">
+      Forgot the password? Check the Cloudflare Pages env var
+      <code class="bg-rule-soft px-1.5 py-0.5 rounded text-[0.7rem]">ADMIN_PASSWORD</code> on the
+      <code class="bg-rule-soft px-1.5 py-0.5 rounded text-[0.7rem]">businessleaders-site</code> project.
+    </p>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const error = document.getElementById('login-error') as HTMLParagraphElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    error.classList.add('hidden');
+    const fd = new FormData(form);
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: fd.get('password') }),
+      credentials: 'same-origin',
+    });
+    if (res.ok) {
+      const next = new URLSearchParams(location.search).get('next') || '/admin/new/';
+      location.href = next;
+    } else {
+      const body = await res.json().catch(() => ({}));
+      error.textContent = body.error || 'Invalid password';
+      error.classList.remove('hidden');
+    }
+  });
+</script>

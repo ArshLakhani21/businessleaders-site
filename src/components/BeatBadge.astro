@@ -5,9 +5,17 @@ interface Props {
   beat: string;
   size?: 'sm' | 'md' | 'lg';
   inverse?: boolean;
+  /**
+   * When true (default), the badge is a real link to /<beat>/.
+   * Set to false when the badge is rendered INSIDE another <a> (e.g. on
+   * a card whose whole surface links to the article). Nested <a> is
+   * invalid HTML; browsers terminate the outer link early, breaking the
+   * title click. Use `link={false}` in card components.
+   */
+  link?: boolean;
 }
 
-const { beat, size = 'md', inverse = false } = Astro.props;
+const { beat, size = 'md', inverse = false, link = true } = Astro.props;
 const meta = getBeat(beat);
 const label = (meta?.displayName ?? beat).toUpperCase();
 const colour = inverse ? '#F5A623' : (meta?.accentColor ?? '#0D1B2A');
@@ -18,10 +26,19 @@ const sizeClasses = {
 }[size];
 ---
 
-<a
-  href={`/${beat}/`}
-  class:list={[sizeClasses, 'inline-block font-bold tracking-[0.08em] uppercase hover:underline']}
-  style={`color:${colour}`}
->
-  {label}
-</a>
+{link ? (
+  <a
+    href={`/${beat}/`}
+    class:list={[sizeClasses, 'inline-block font-bold tracking-[0.08em] uppercase hover:underline']}
+    style={`color:${colour}`}
+  >
+    {label}
+  </a>
+) : (
+  <span
+    class:list={[sizeClasses, 'inline-block font-bold tracking-[0.08em] uppercase']}
+    style={`color:${colour}`}
+  >
+    {label}
+  </span>
+)}

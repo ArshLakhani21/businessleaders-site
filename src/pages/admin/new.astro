@@ -1,0 +1,241 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { BEATS } from '../../data/beats.ts';
+---
+
+<BaseLayout title="New article — Business Leader Admin" showJustIn={false} showBottomTicker={false}>
+  <div class="max-w-3xl mx-auto pt-8 pb-12">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="font-serif text-3xl font-extrabold text-navy">New article</h1>
+      <div class="flex gap-3 text-sm">
+        <a href="/admin/manage/" class="text-gold font-semibold hover:underline">Manage articles →</a>
+        <button id="logout-btn" class="text-muted font-semibold hover:text-navy">Log out</button>
+      </div>
+    </div>
+    <p class="text-muted text-sm mb-7">
+      Compose a manual article. Saving commits a new markdown file to the site repo and triggers a Cloudflare deploy in ~60 seconds.
+    </p>
+
+    <form id="article-form" class="flex flex-col gap-5">
+      <label class="block">
+        <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Title <span class="text-down-red">*</span></span>
+        <input name="title" required minlength="20" maxlength="100" class="form-input" placeholder="20–100 characters" />
+        <span class="text-xs text-muted mt-1 block">SEO headline. 55–70 chars is the sweet spot.</span>
+      </label>
+
+      <div class="grid grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Beat <span class="text-down-red">*</span></span>
+          <select name="beat" required class="form-input">
+            {BEATS.map((b) => <option value={b.slug}>{b.displayName}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Slug <span class="text-down-red">*</span></span>
+          <input name="slug" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" class="form-input" placeholder="lowercase-words-with-dashes" />
+          <span class="text-xs text-muted mt-1 block">Used in the URL. Auto-generated from title; edit if needed.</span>
+        </label>
+      </div>
+
+      <label class="block">
+        <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Author</span>
+        <input name="authorName" value="Arsh Lakhani" class="form-input" />
+      </label>
+
+      <label class="block">
+        <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Meta description <span class="text-down-red">*</span></span>
+        <textarea name="metaDescription" required minlength="120" maxlength="170" rows="2" class="form-input" placeholder="120–170 characters. Shows in search results and social previews."></textarea>
+        <span class="text-xs text-muted mt-1 block"><span id="meta-count">0</span> chars</span>
+      </label>
+
+      <label class="block">
+        <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Tags (comma-separated)</span>
+        <input name="tags" class="form-input" placeholder="rbi, sensex, banking, monetary-policy" />
+      </label>
+
+      <fieldset class="border border-rule rounded-md p-4">
+        <legend class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider px-2">Featured image</legend>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          <label class="block">
+            <span class="text-xs text-muted mb-1 block">Upload</span>
+            <input type="file" name="imageFile" accept="image/jpeg,image/png,image/webp" id="image-file" class="block text-sm" />
+            <span class="text-xs text-muted mt-1 block">Or paste a Pexels/Unsplash URL below.</span>
+          </label>
+          <label class="block">
+            <span class="text-xs text-muted mb-1 block">Or external URL</span>
+            <input type="url" name="imageUrl" class="form-input" placeholder="https://images.pexels.com/..." />
+          </label>
+          <label class="block md:col-span-2">
+            <span class="text-xs text-muted mb-1 block">Alt text <span class="text-down-red">*</span></span>
+            <input name="imageAlt" required class="form-input" />
+          </label>
+          <label class="block">
+            <span class="text-xs text-muted mb-1 block">Photographer credit</span>
+            <input name="photographer" value="Business Leader" class="form-input" />
+          </label>
+          <label class="block">
+            <span class="text-xs text-muted mb-1 block">Image source</span>
+            <select name="imageSource" class="form-input">
+              <option value="fallback">Custom upload / fallback</option>
+              <option value="pexels">Pexels</option>
+              <option value="unsplash">Unsplash</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <label class="block">
+        <span class="text-[0.78rem] font-semibold text-navy uppercase tracking-wider mb-1.5 block">Body (Markdown) <span class="text-down-red">*</span></span>
+        <textarea name="body" required rows="20" class="form-input font-mono text-sm leading-relaxed" placeholder="The lede paragraph hooks the reader…
+
+A second paragraph develops the story…
+
+Use ## for section headings, **bold**, _italic_, > pull quotes."></textarea>
+        <span class="text-xs text-muted mt-1 block"><span id="body-words">0</span> words · target 800–1200</span>
+      </label>
+
+      <input type="hidden" name="auditScore" value="7" />
+      <input type="hidden" name="runId" value="manual" />
+
+      <div class="flex items-center gap-3 pt-2 border-t border-rule">
+        <button type="submit" id="submit-btn" class="bg-gold text-navy font-bold uppercase tracking-wider px-6 py-3 rounded-md hover:bg-gold-deep transition-colors">
+          Publish article
+        </button>
+        <p id="status-msg" class="text-sm hidden"></p>
+      </div>
+    </form>
+  </div>
+</BaseLayout>
+
+<style>
+  .form-input {
+    @apply w-full border-2 border-rule rounded-md px-3 py-2 text-sm outline-none focus:border-gold transition-colors;
+  }
+</style>
+
+<script>
+  function slugify(s: string) {
+    return s
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60)
+      .replace(/-[^-]*$/, (m) => (m.length > 0 ? '' : m));
+  }
+
+  const form = document.getElementById('article-form') as HTMLFormElement;
+  const titleInput = form.querySelector('[name=title]') as HTMLInputElement;
+  const slugInput = form.querySelector('[name=slug]') as HTMLInputElement;
+  const metaTextarea = form.querySelector('[name=metaDescription]') as HTMLTextAreaElement;
+  const metaCount = document.getElementById('meta-count')!;
+  const bodyTextarea = form.querySelector('[name=body]') as HTMLTextAreaElement;
+  const bodyWords = document.getElementById('body-words')!;
+  const statusMsg = document.getElementById('status-msg')!;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+  let slugTouched = false;
+  slugInput.addEventListener('input', () => (slugTouched = true));
+  titleInput.addEventListener('input', () => {
+    if (!slugTouched) slugInput.value = slugify(titleInput.value);
+  });
+
+  metaTextarea.addEventListener('input', () => (metaCount.textContent = String(metaTextarea.value.length)));
+  bodyTextarea.addEventListener('input', () => {
+    const w = (bodyTextarea.value.match(/\S+/g) || []).length;
+    bodyWords.textContent = String(w);
+  });
+
+  document.getElementById('logout-btn')!.addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+    location.href = '/admin/';
+  });
+
+  function setStatus(text: string, kind: 'info' | 'ok' | 'err') {
+    statusMsg.textContent = text;
+    statusMsg.classList.remove('hidden', 'text-up-green', 'text-down-red', 'text-muted');
+    statusMsg.classList.add(kind === 'ok' ? 'text-up-green' : kind === 'err' ? 'text-down-red' : 'text-muted');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    setStatus('Uploading…', 'info');
+
+    const fd = new FormData(form);
+    const file = (fd.get('imageFile') as File) || null;
+    let imagePath = '';
+
+    try {
+      // 1. Upload image if present
+      if (file && file.size > 0) {
+        const reader = new FileReader();
+        const dataUrl = await new Promise<string>((res, rej) => {
+          reader.onload = () => res(reader.result as string);
+          reader.onerror = rej;
+          reader.readAsDataURL(file);
+        });
+        const upRes = await fetch('/api/admin/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: fd.get('slug'),
+            filename: file.name,
+            contentBase64: dataUrl.split(',')[1],
+          }),
+          credentials: 'same-origin',
+        });
+        if (!upRes.ok) {
+          const j = await upRes.json().catch(() => ({}));
+          throw new Error('Image upload: ' + (j.error || upRes.statusText));
+        }
+        const up = await upRes.json();
+        imagePath = up.path;
+      } else {
+        imagePath = (fd.get('imageUrl') as string) || '/og-image.png';
+      }
+
+      // 2. Submit article
+      const wordCount = (((fd.get('body') as string) || '').match(/\S+/g) || []).length;
+      const articleBody = {
+        title: fd.get('title'),
+        slug: fd.get('slug'),
+        beat: fd.get('beat'),
+        authorName: fd.get('authorName'),
+        metaDescription: fd.get('metaDescription'),
+        tags: ((fd.get('tags') as string) || '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+        imagePath,
+        imageAlt: fd.get('imageAlt'),
+        photographer: fd.get('photographer'),
+        imageSource: fd.get('imageSource'),
+        body: fd.get('body'),
+        wordCount,
+        auditScore: 7,
+        runId: 'manual',
+      };
+
+      setStatus('Committing to GitHub…', 'info');
+      const pubRes = await fetch('/api/admin/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(articleBody),
+        credentials: 'same-origin',
+      });
+      if (!pubRes.ok) {
+        const j = await pubRes.json().catch(() => ({}));
+        throw new Error('Publish: ' + (j.error || pubRes.statusText));
+      }
+      const result = await pubRes.json();
+      setStatus(`Published. Cloudflare deploys in ~60s. ${result.url ? 'Live URL: ' + result.url : ''}`, 'ok');
+      form.reset();
+    } catch (err: any) {
+      setStatus(err.message, 'err');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>

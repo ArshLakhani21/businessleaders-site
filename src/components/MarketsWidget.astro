@@ -1,31 +1,74 @@
 ---
-// Static placeholder. When live data is wired (e.g. via a Cloudflare
-// Worker scheduled fetch) replace this with the real data feed and
-// keep the same row format.
-const MARKETS = [
-  { name: 'SENSEX', val: '75,214', pct: '+0.45%', up: true },
-  { name: 'NIFTY 50', val: '22,814', pct: '+0.43%', up: true },
-  { name: 'RELIANCE', val: '2,921', pct: '-0.48%', up: false },
-  { name: 'TCS', val: '4,105', pct: '+1.54%', up: true },
-  { name: 'GOLD ₹', val: '75,000', pct: '+1.63%', up: true },
+// Live markets widget. Initial server render shows a loading state;
+// client-side script hydrates with real data from /api/markets which
+// proxies Yahoo Finance with edge caching. If the fetch fails (network
+// issue, Yahoo rate limit), the loading row stays — better than fake
+// data.
+
+const PLACEHOLDERS = [
+  { name: 'SENSEX' },
+  { name: 'NIFTY 50' },
+  { name: 'RELIANCE' },
+  { name: 'TCS' },
+  { name: 'GOLD ($/oz)' },
 ];
 ---
 
-<div class="bg-white border border-rule-soft rounded-md p-4">
-  <div class="text-[0.65rem] font-bold tracking-[0.1em] uppercase text-muted mb-3">
-    Live Markets
+<div class="bg-white border border-rule-soft rounded-md p-4" data-markets-widget>
+  <div class="flex items-center justify-between mb-3">
+    <span class="text-[0.65rem] font-bold tracking-[0.1em] uppercase text-muted">Live Markets</span>
+    <span class="text-[0.55rem] text-muted" id="markets-time">…</span>
   </div>
-  {MARKETS.map((m) => (
-    <div class="flex justify-between items-center py-1.5 border-b border-rule-soft last:border-b-0">
-      <span class="text-[0.75rem] font-semibold text-navy">{m.name}</span>
-      <span class="font-mono">
-        <span class:list={['text-[0.78rem] font-bold mr-1', m.up ? 'market-up' : 'market-down']}>
-          {m.val}
-        </span>
-        <span class:list={['text-[0.7rem] font-semibold', m.up ? 'market-up' : 'market-down']}>
-          {m.up ? '▲' : '▼'} {m.pct}
-        </span>
-      </span>
-    </div>
-  ))}
+  <div id="markets-rows">
+    {PLACEHOLDERS.map((m) => (
+      <div class="flex justify-between items-center py-1.5 border-b border-rule-soft last:border-b-0">
+        <span class="text-[0.75rem] font-semibold text-navy">{m.name}</span>
+        <span class="font-mono text-[0.78rem] text-rule">…</span>
+      </div>
+    ))}
+  </div>
 </div>
+
+<script>
+  function fmtTime(iso: string) {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return '';
+    }
+  }
+
+  async function loadMarkets() {
+    const container = document.querySelector('[data-markets-widget]') as HTMLElement | null;
+    if (!container) return;
+    const rows = container.querySelector('#markets-rows') as HTMLElement;
+    const time = container.querySelector('#markets-time') as HTMLElement;
+    try {
+      const res = await fetch('/api/markets', { credentials: 'omit' });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      const data = await res.json();
+      time.textContent = `as of ${fmtTime(data.fetchedAt)}`;
+      rows.innerHTML = data.quotes
+        .map((q: any) => {
+          const cls = q.up ? 'text-up-green' : 'text-down-red';
+          const arrow = q.up ? '▲' : '▼';
+          return `
+            <div class="flex justify-between items-center py-1.5 border-b border-rule-soft last:border-b-0">
+              <span class="text-[0.75rem] font-semibold text-navy">${q.name}</span>
+              <span class="font-mono">
+                <span class="text-[0.78rem] font-bold mr-1 ${cls}">${q.val}</span>
+                <span class="text-[0.7rem] font-semibold ${cls}">${arrow} ${q.pct}</span>
+              </span>
+            </div>`;
+        })
+        .join('');
+    } catch (err) {
+      time.textContent = 'unavailable';
+    }
+  }
+
+  loadMarkets();
+  // Refresh every 90s while the page is open.
+  setInterval(loadMarkets, 90_000);
+</script>

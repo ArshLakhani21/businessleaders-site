@@ -134,20 +134,8 @@ const shareUrl = encodeURIComponent(new URL(Astro.url.pathname, Astro.site ?? 'h
       </a>
     </div>
 
-    <section class="mt-7">
-      <h3 class="text-[0.68rem] font-bold tracking-[0.1em] uppercase text-navy pl-2.5 mb-3 border-l-[3px] border-gold">
-        Sources
-      </h3>
-      <ul class="text-[0.85rem] text-muted space-y-1">
-        {article.sources.map((s) => (
-          <li>
-            <a href={s.url} rel="nofollow noopener" class="text-gold hover:underline">
-              {s.name}
-            </a>
-            <span class="text-[0.7rem] ml-2 uppercase tracking-wider">{s.language}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
+    {/* Sources block intentionally not rendered. The frontmatter
+        retains the sources array for engine analytics + audit trail,
+        but readers see Business Leader as the originating publication. */}
   </article>
 </BaseLayout>
