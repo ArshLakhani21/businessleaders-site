@@ -10,6 +10,7 @@ export default defineConfig({
     sitemap({
       changefreq: 'daily',
       priority: 0.7,
+      filter: (page) => !page.includes('/admin'),
     }),
   ],
   build: {
